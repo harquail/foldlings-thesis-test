@@ -3,6 +3,13 @@ PANDOC=pandoc
 
 BASEDIR=$(CURDIR)
 INPUTDIR=$(BASEDIR)/source
+# shared directory
+SHAREDDIR=$(BASEDIR)/source/shared
+# chapters only in marissa's thesis
+MARISSADIR=$(BASEDIR)/source/marissa
+# chapters only in nook's thesis
+NOOKDIR=$(BASEDIR)/source/nook
+
 OUTPUTDIR=$(BASEDIR)/output
 TEMPLATEDIR=$(INPUTDIR)/templates
 STYLEDIR=$(BASEDIR)/style
@@ -24,8 +31,22 @@ help:
 	@echo 'get local templates with: pandoc -D latex/html/etc	  				  '
 	@echo 'or generic ones from: https://github.com/jgm/pandoc-templates		  '
 
-pdf:
-	pandoc $(INPUTDIR)/*.md \
+# pdf:
+# 	pandoc $(INPUTDIR)/*.md \
+# 	-o $(OUTPUTDIR)/thesis.pdf \
+# 	-H $(STYLEDIR)/preamble.tex \
+# 	--template $(STYLEDIR)/template.tex \
+# 	--bibliography=$(BIBFILE) 2>pandoc.log \
+# 	--csl=$(STYLEDIR)/ref_format.csl \
+# 	-V fontsize=12pt \
+# 	-V papersize=a4paper \
+# 	-V documentclass:report \
+# 	-N \
+# 	--latex-engine=xelatex
+
+npdf:
+	$(shell cp $(NOOKDIR)/* $(OUTPUTDIR) && cp $(SHAREDDIR)/* $(OUTPUTDIR))
+	pandoc $(OUTPUTDIR)/*.md  \
 	-o $(OUTPUTDIR)/thesis.pdf \
 	-H $(STYLEDIR)/preamble.tex \
 	--template $(STYLEDIR)/template.tex \
@@ -36,38 +57,22 @@ pdf:
 	-V documentclass:report \
 	-N \
 	--latex-engine=xelatex
+  $(shell find $(OUTPUTDIR) -type f ! -name '*.pdf' -delete)
 
-tex:
-	pandoc $(INPUTDIR)/*.md \
-	-o $(OUTPUTDIR)/thesis.tex \
+mpdf:
+	$(shell cp $(NOOKDIR)/* $(OUTPUTDIR) && cp $(SHAREDDIR)/* $(OUTPUTDIR))
+	pandoc $(OUTPUTDIR)/*.md  \
+	-o $(OUTPUTDIR)/thesis.pdf \
 	-H $(STYLEDIR)/preamble.tex \
-	--bibliography=$(BIBFILE) \
+	--template $(STYLEDIR)/template.tex \
+	--bibliography=$(BIBFILE) 2>pandoc.log \
+	--csl=$(STYLEDIR)/ref_format.csl \
 	-V fontsize=12pt \
 	-V papersize=a4paper \
 	-V documentclass:report \
 	-N \
-	--csl=$(STYLEDIR)/ref_format.csl \
 	--latex-engine=xelatex
+  $(shell find $(OUTPUTDIR) -type f ! -name '*.pdf' -delete)
 
-docx:
-	pandoc $(INPUTDIR)/*.md \
-	-o $(OUTPUTDIR)/thesis.docx \
-	--bibliography=$(BIBFILE) \
-	--csl=$(STYLEDIR)/ref_format.csl \
-	--toc
-
-html:
-	pandoc $(INPUTDIR)/*.md \
-	-o $(OUTPUTDIR)/thesis.html \
-	--standalone \
-	--template=$(STYLEDIR)/template.html \
-	--bibliography=$(BIBFILE) \
-	--csl=$(STYLEDIR)/ref_format.csl \
-	--include-in-header=$(STYLEDIR)/style.css \
-	--toc \
-	--number-sections
-	rm -rf $(OUTPUTDIR)/source
-	mkdir $(OUTPUTDIR)/source
-	cp -r $(INPUTDIR)/figures $(OUTPUTDIR)/source/figures
 
 .PHONY: help pdf docx html tex
